@@ -809,6 +809,86 @@ with tab_scan:
 
 with tab_gen:
     st.header(t('new_item'), help=t('desc_create'))
+    # Full-screen drag & drop overlay that redirects files to the uploader
+    components.html("""
+    <style>
+        #drop-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(98, 0, 234, 0.15);
+            border: 4px dashed #6200EA;
+            z-index: 999999;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+        #drop-overlay.active { display: flex; pointer-events: auto; }
+        #drop-overlay .drop-text {
+            font-size: 2rem; font-weight: bold; color: #6200EA;
+            background: rgba(255,255,255,0.9); padding: 30px 60px;
+            border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+    <div id="drop-overlay"><div class="drop-text">📷 Drop image here</div></div>
+    <script>
+    const doc = window.parent.document;
+    const overlay = document.getElementById('drop-overlay');
+    let dragCounter = 0;
+
+    doc.addEventListener('dragenter', function(e) {
+        e.preventDefault();
+        dragCounter++;
+        if (e.dataTransfer && e.dataTransfer.types && e.dataTransfer.types.indexOf('Files') !== -1) {
+            overlay.classList.add('active');
+        }
+    });
+    doc.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dragCounter--;
+        if (dragCounter <= 0) { overlay.classList.remove('active'); dragCounter = 0; }
+    });
+    doc.addEventListener('dragover', function(e) { e.preventDefault(); });
+    doc.addEventListener('drop', function(e) {
+        e.preventDefault();
+        overlay.classList.remove('active');
+        dragCounter = 0;
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            // Find the file uploader input in the Criar Item tab
+            const uploaders = doc.querySelectorAll('input[type="file"]');
+            for (const input of uploaders) {
+                const accept = input.getAttribute('accept') || '';
+                if (accept.includes('heic') || accept.includes('image')) {
+                    const dt = new DataTransfer();
+                    dt.items.add(e.dataTransfer.files[0]);
+                    input.files = dt.files;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    break;
+                }
+            }
+        }
+    });
+    overlay.addEventListener('drop', function(e) {
+        e.preventDefault();
+        overlay.classList.remove('active');
+        dragCounter = 0;
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const uploaders = doc.querySelectorAll('input[type="file"]');
+            for (const input of uploaders) {
+                const accept = input.getAttribute('accept') || '';
+                if (accept.includes('heic') || accept.includes('image')) {
+                    const dt = new DataTransfer();
+                    dt.items.add(e.dataTransfer.files[0]);
+                    input.files = dt.files;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    break;
+                }
+            }
+        }
+    });
+    </script>
+    """, height=0)
     if 'gen_id' not in st.session_state: st.session_state.gen_id = str(random.randint(10000000, 99999999))
     with st.form("new"):
         c1, c2 = st.columns(2)
