@@ -707,8 +707,8 @@ with tab_dash:
     m2.metric(t('pieces'), int(df['quantity'].sum()))
     tot_cost = (df['quantity'] * df['cost_price']).sum()
     tot_sell = (df['quantity'] * df['sell_price']).sum()
-    m3.metric(t('stock_val'), f"R$ {tot_cost:,.2f}")
-    m4.metric(t('pot_sales'), f"R$ {tot_sell:,.2f}", delta=f"{t('profit')}: {tot_sell-tot_cost:,.2f}")
+    m3.metric(t('stock_val'), f"${tot_cost:,.2f}")
+    m4.metric(t('pot_sales'), f"${tot_sell:,.2f}", delta=f"{t('profit')}: {tot_sell-tot_cost:,.2f}")
     st.markdown("---")
     if os.path.exists(HISTORY_FILE):
         hist = pd.read_csv(HISTORY_FILE)
@@ -726,7 +726,7 @@ with tab_dash:
             curr_mask = (sales['date'] > now - timedelta(days=days)) & (sales['date'] <= now)
             prev_mask = (sales['date'] > now - timedelta(days=days*2)) & (sales['date'] <= now - timedelta(days=days))
             val_curr = sales[curr_mask]['profit'].sum(); val_prev = sales[prev_mask]['profit'].sum(); delta = val_curr - val_prev
-            st.metric(f"💰 Lucro ({period_opt})", f"R$ {val_curr:,.2f}", delta=f"{delta:,.2f} {t('vs_prev')}")
+            st.metric(f"💰 Lucro ({period_opt})", f"${val_curr:,.2f}", delta=f"{delta:,.2f} {t('vs_prev')}")
             g_tab1, g_tab2, g_tab3 = st.tabs([t('g_daily'), t('g_cum'), t('g_vol')])
             chart_data = sales[curr_mask].copy()
             if not chart_data.empty:
@@ -993,7 +993,7 @@ with tab_data_ui:
     disp['qr_d'] = disp['qr_path'].apply(path_to_image_html)
     disp['bc_d'] = disp['barcode_path'].apply(path_to_image_html)
     disp['Status'] = disp['quantity'].apply(lambda x: "🟢" if x>=25 else "🟡" if x>=5 else "🔴")
-    ed = st.data_editor(disp, column_config={"Status": st.column_config.TextColumn("St", width="small"), "img_d": st.column_config.ImageColumn("📸", width="small"), "qr_d": st.column_config.ImageColumn("QR", width="small"), "bc_d": st.column_config.ImageColumn("Bar", width="medium"), "quantity": st.column_config.ProgressColumn("Qtd", max_value=100), "cost_price": st.column_config.NumberColumn(t('cost'), format="R$ %.2f"), "sell_price": st.column_config.NumberColumn(t('price'), format="R$ %.2f"), "image_path": None, "qr_path": None, "barcode_path": None, "display_label": None}, use_container_width=True, num_rows="dynamic", key="editor", column_order=["Status", "img_d", "product_id", "product_name", "quantity", "cost_price", "sell_price", "min_stock", "qr_d", "bc_d"])
+    ed = st.data_editor(disp, column_config={"Status": st.column_config.TextColumn("St", width="small"), "img_d": st.column_config.ImageColumn("📸", width="small"), "qr_d": st.column_config.ImageColumn("QR", width="small"), "bc_d": st.column_config.ImageColumn("Bar", width="medium"), "quantity": st.column_config.ProgressColumn("Qtd", max_value=100), "cost_price": st.column_config.NumberColumn(t('cost'), format="$%.2f"), "sell_price": st.column_config.NumberColumn(t('price'), format="$%.2f"), "image_path": None, "qr_path": None, "barcode_path": None, "display_label": None}, use_container_width=True, num_rows="dynamic", key="editor", column_order=["Status", "img_d", "product_id", "product_name", "quantity", "cost_price", "sell_price", "min_stock", "qr_d", "bc_d"])
     if not disp.equals(ed):
         for c in ['product_name', 'quantity', 'min_stock', 'cost_price', 'sell_price']: df[c] = ed[c]
         if len(df) != len(ed): save_data(ed.drop(columns=['img_d','qr_d','bc_d','Status', 'display_label']))
