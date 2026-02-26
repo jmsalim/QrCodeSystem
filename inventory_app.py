@@ -608,7 +608,7 @@ st.markdown("""<style>
 </style>""", unsafe_allow_html=True)
 
 with st.sidebar:
-    if os.path.exists(LOGO_FILE): st.image(LOGO_FILE, use_container_width=True)
+    if os.path.exists(LOGO_FILE): st.image(LOGO_FILE, width='stretch')
     st.markdown(f"## {config.get('company_name')}")
     st.caption("Powered by **QUANTIX**")
     st.markdown("---")
@@ -795,7 +795,9 @@ with tab_scan:
         elif mobile:
             st.info(t('take_photo')); img = st.file_uploader("QR", type=['png','jpg','heic','heif'], key="mob", label_visibility="collapsed")
             if img:
-                d, _, _ = cv2.QRCodeDetector().detectAndDecode(cv2.imdecode(np.frombuffer(img.getvalue(), np.uint8), cv2.IMREAD_COLOR))
+                pil_img = Image.open(img).convert("RGB")
+                cv_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+                d, _, _ = cv2.QRCodeDetector().detectAndDecode(cv_img)
                 if d: 
                     if update_stock(d): st.success(f"Lido: {d}")
                     else: st.error(t('err_error'))
@@ -902,9 +904,9 @@ with tab_gen:
         with c2:
             up_img = st.file_uploader(t('image'), type=['png','jpg','jpeg','heic','heif'])
             if up_img:
-                st.image(up_img, caption=up_img.name, use_container_width=True)
+                st.image(up_img, caption=up_img.name, width='stretch')
             else:
-                st.image(PLACEHOLDER_FILE, caption=t('no_img_text'), use_container_width=True)
+                st.image(PLACEHOLDER_FILE, caption=t('no_img_text'), width='stretch')
         if st.form_submit_button(t('save')):
             if name and pid:
                 df = load_data()
