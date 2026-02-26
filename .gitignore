@@ -3,18 +3,9 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Sensitive / local data
-config.json
-inventory.csv
+# Sensitive / local only
 history.csv
-
-# Generated assets
 backups/
-product_images/
-qr_codes/
-barcodes/
-placeholder.png
-logo.png
 mobile_connect.png
 
 # Build / installer artifacts
@@ -33,6 +24,8 @@ Quantix_Installer.zip
 admin_keygen.py
 build_release.py
 make_icon.py
+henry/
 INSTALL_SHORTCUT.bat
 LAUNCH_MAC.command
 LAUNCH_WINDOWS.bat
+test_output.png
